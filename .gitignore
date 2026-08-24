@@ -1,0 +1,6 @@
+db_data/
+db-init/edoc_full_backup.sql
+.env
+*.env.local
+.DS_Store
+.vscode/
