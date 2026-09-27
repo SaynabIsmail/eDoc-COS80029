@@ -1,0 +1,4 @@
+/vendor/
+config.microsoft.php
+connection.php
+*.log
