@@ -1,28 +1,17 @@
 <?php
+// Admin removes a doctor along with their sessions, bookings and calendar events
+ob_start();
+session_start();
 
-    session_start();
+if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'a') {
+    header("location: ../login.php");
+    exit;
+}
 
-    if(isset($_SESSION["user"])){
-        if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
-        }
-
-    }else{
-        header("location: ../login.php");
-    }
-    
-    
-    if($_GET){
-        //import database
-        include("../connection.php");
-        $id=$_GET["id"];
-        $result001= $database->query("select * from doctor where docid=$id;");
-        $email=($result001->fetch_assoc())["docemail"];
-        $sql= $database->query("delete from webuser where email='$email';");
-        $sql= $database->query("delete from doctor where docemail='$email';");
-        //print_r($email);
-        header("location: doctors.php");
-    }
-
-
-?>
+if (isset($_GET["id"])) {
+    include("../connection.php");
+    require_once __DIR__ . '/../lib/accounts.php';
+    edoc_delete_doctor($database, (int)$_GET["id"]);
+}
+header("location: doctors.php");
+exit;
