@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/main.css">  
     <link rel="stylesheet" href="../css/admin.css">
         
-    <title>Dashboard</title>
+    <title>Admin Dashboard | eDoc</title>
     <style>
         .dashbord-tables{
             animation: transitionIn-Y-over 0.5s;
@@ -32,11 +32,11 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
+            header("location: ../login.php"); exit;
         }
 
     }else{
-        header("location: ../login.php");
+        header("location: ../login.php"); exit;
     }
     
 
@@ -62,7 +62,7 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="../logout.php" ><input type="button" value="Log out" class="logout-btn btn-primary-soft btn"></a>
+                                    <a href="../logout.php" ><input type="button" value="Sign out" class="logout-btn btn-primary-soft btn"></a>
                                 </td>
                             </tr>
                     </table>
@@ -85,7 +85,7 @@
                 </tr>
                 <tr class="menu-row">
                     <td class="menu-btn menu-icon-appoinment">
-                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">Appointment</p></a></div>
+                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">Appointments</p></a></div>
                     </td>
                 </tr>
                 <tr class="menu-row" >
@@ -104,7 +104,7 @@
                                 
                                 <form action="doctors.php" method="post" class="header-search">
         
-                                    <input type="search" name="search" class="input-text header-searchbar" placeholder="Search Doctor name or Email" list="doctors">&nbsp;&nbsp;
+                                    <input type="search" name="search" class="input-text header-searchbar" placeholder="Search by doctor name or email" list="doctors">&nbsp;&nbsp;
                                     
                                     <?php
                                         echo '<datalist id="doctors">';
@@ -129,11 +129,11 @@
                             </td>
                             <td width="15%">
                                 <p style="font-size: 14px;color: rgb(119, 119, 119);padding: 0;margin: 0;text-align: right;">
-                                    Today's Date
+                                    Today's date
                                 </p>
                                 <p class="heading-sub12" style="padding: 0;margin: 0;">
                                     <?php 
-                                date_default_timezone_set('Asia/Kolkata');
+                                date_default_timezone_set('Australia/Melbourne');
         
                                 $today = date('Y-m-d');
                                 echo $today;
@@ -161,7 +161,7 @@
                         <table class="filter-container" style="border: none;" border="0">
                             <tr>
                                 <td colspan="4">
-                                    <p style="font-size: 20px;font-weight:600;padding-left: 12px;">Status</p>
+                                    <p style="font-size: 20px;font-weight:600;padding-left: 12px;">Overview</p>
                                 </td>
                             </tr>
                             <tr>
@@ -198,7 +198,7 @@
                                                     <?php    echo $appointmentrow ->num_rows  ?>
                                                 </div><br>
                                                 <div class="h3-dashboard" >
-                                                    NewBooking &nbsp;&nbsp;
+                                                    New bookings &nbsp;&nbsp;
                                                 </div>
                                         </div>
                                                 <div class="btn-icon-back dashboard-icons" style="margin-left: 0px;background-image: url('../img/icons/book-hover.svg');"></div>
@@ -211,7 +211,7 @@
                                                     <?php    echo $schedulerow ->num_rows  ?>
                                                 </div><br>
                                                 <div class="h3-dashboard" style="font-size: 15px">
-                                                    Today Sessions
+                                                    Today's sessions
                                                 </div>
                                         </div>
                                                 <div class="btn-icon-back dashboard-icons" style="background-image: url('../img/icons/session-iceblue.svg');"></div>
@@ -235,25 +235,25 @@
                             <tr>
                                 <td>
                                     <p style="padding:10px;padding-left:48px;padding-bottom:0;font-size:23px;font-weight:700;color:var(--primarycolor);">
-                                        Upcoming Appointments until Next <?php  
-                                        echo date("l",strtotime("+1 week"));
+                                        Upcoming appointments until <?php  
+                                        echo date("l j F",strtotime("+1 week"));
                                         ?>
                                     </p>
                                     <p style="padding-bottom:19px;padding-left:50px;font-size:15px;font-weight:500;color:#212529e3;line-height: 20px;">
-                                        Here's Quick access to Upcoming Appointments until 7 days<br>
-                                        More details available in @Appointment section.
+                                        Appointments booked for the next seven days.<br>
+                                        Full details are available in the Appointments section.
                                     </p>
 
                                 </td>
                                 <td>
                                     <p style="text-align:right;padding:10px;padding-right:48px;padding-bottom:0;font-size:23px;font-weight:700;color:var(--primarycolor);">
-                                        Upcoming Sessions  until Next <?php  
-                                        echo date("l",strtotime("+1 week"));
+                                        Upcoming sessions until <?php  
+                                        echo date("l j F",strtotime("+1 week"));
                                         ?>
                                     </p>
                                     <p style="padding-bottom:19px;text-align:right;padding-right:50px;font-size:15px;font-weight:500;color:#212529e3;line-height: 20px;">
-                                        Here's Quick access to Upcoming Sessions that Scheduled until 7 days<br>
-                                        Add,Remove and Many features available in @Schedule section.
+                                        Sessions scheduled for the next seven days.<br>
+                                        Sessions can be added or removed in the Schedule section.
                                     </p>
                                 </td>
                             </tr>
@@ -270,7 +270,7 @@
                                                     
                                                 </th>
                                                 <th class="table-headin">
-                                                    Patient name
+                                                    Patient
                                                 </th>
                                                 <th class="table-headin">
                                                     
@@ -302,8 +302,8 @@
                                                     <img src="../img/notfound.svg" width="25%">
                                                     
                                                     <br>
-                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">We  couldnt find anything related to your keywords !</p>
-                                                    <a class="non-style-link" href="appointment.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Show all Appointments &nbsp;</font></button>
+                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">No matching records were found.</p>
+                                                    <a class="non-style-link" href="appointment.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; View all appointments &nbsp;</font></button>
                                                     </a>
                                                     </center>
                                                     <br><br><br><br>
@@ -333,16 +333,16 @@
 
                                                         <td style="font-weight:600;"> &nbsp;'.
                                                         
-                                                        substr($pname,0,25)
+                                                        substr((string)$pname,0,25)
                                                         .'</td >
                                                         <td style="font-weight:600;"> &nbsp;'.
                                                         
-                                                            substr($docname,0,25)
+                                                            substr((string)$docname,0,25)
                                                             .'</td >
                                                            
                                                         
                                                         <td>
-                                                        '.substr($title,0,15).'
+                                                        '.substr((string)$title,0,15).'
                                                         </td>
 
                                                     </tr>';
@@ -367,7 +367,7 @@
                                                 <th class="table-headin">
                                                     
                                                 
-                                                Session Title
+                                                Session
                                                 
                                                 </th>
                                                 
@@ -376,7 +376,7 @@
                                                 </th>
                                                 <th class="table-headin">
                                                     
-                                                    Sheduled Date & Time
+                                                    Date & time
                                                     
                                                 </th>
                                                     
@@ -397,8 +397,8 @@
                                                     <img src="../img/notfound.svg" width="25%">
                                                     
                                                     <br>
-                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">We  couldnt find anything related to your keywords !</p>
-                                                    <a class="non-style-link" href="schedule.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Show all Sessions &nbsp;</font></button>
+                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">No matching records were found.</p>
+                                                    <a class="non-style-link" href="schedule.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; View all sessions &nbsp;</font></button>
                                                     </a>
                                                     </center>
                                                     <br><br><br><br>
@@ -417,13 +417,13 @@
                                                     $nop=$row["nop"];
                                                     echo '<tr>
                                                         <td style="padding:20px;"> &nbsp;'.
-                                                        substr($title,0,30)
+                                                        substr((string)$title,0,30)
                                                         .'</td>
                                                         <td>
-                                                        '.substr($docname,0,20).'
+                                                        '.substr((string)$docname,0,20).'
                                                         </td>
                                                         <td style="text-align:center;">
-                                                            '.substr($scheduledate,0,10).' '.substr($scheduletime,0,5).'
+                                                            '.substr((string)$scheduledate,0,10).' '.substr((string)$scheduletime,0,5).'
                                                         </td>
 
                 
@@ -445,12 +445,12 @@
                             <tr>
                                 <td>
                                     <center>
-                                        <a href="appointment.php" class="non-style-link"><button class="btn-primary btn" style="width:85%">Show all Appointments</button></a>
+                                        <a href="appointment.php" class="non-style-link"><button class="btn-primary btn" style="width:85%">View all appointments</button></a>
                                     </center>
                                 </td>
                                 <td>
                                     <center>
-                                        <a href="schedule.php" class="non-style-link"><button class="btn-primary btn" style="width:85%">Show all Sessions</button></a>
+                                        <a href="schedule.php" class="non-style-link"><button class="btn-primary btn" style="width:85%">View all sessions</button></a>
                                     </center>
                                 </td>
                             </tr>

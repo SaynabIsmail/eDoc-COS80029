@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/main.css">  
     <link rel="stylesheet" href="../css/admin.css">
         
-    <title>Appointments</title>
+    <title>My Appointments | eDoc</title>
     <style>
         .popup{
             animation: transitionIn-Y-bottom 0.5s;
@@ -27,13 +27,13 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='d'){
-            header("location: ../login.php");
+            header("location: ../login.php"); exit;
         }else{
             $useremail=$_SESSION["user"];
         }
 
     }else{
-        header("location: ../login.php");
+        header("location: ../login.php"); exit;
     }
     
     
@@ -57,13 +57,13 @@
                                     <img src="../img/user.png" alt="" width="100%" style="border-radius:50%">
                                 </td>
                                 <td style="padding:0px;margin:0px;">
-                                    <p class="profile-title"><?php echo substr($username,0,13)  ?>..</p>
-                                    <p class="profile-subtitle"><?php echo substr($useremail,0,22)  ?></p>
+                                    <p class="profile-title"><?php echo htmlspecialchars((string)$username) ?></p>
+                                    <p class="profile-subtitle"><?php echo substr((string)$useremail,0,22)  ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="../logout.php" ><input type="button" value="Log out" class="logout-btn btn-primary-soft btn"></a>
+                                    <a href="../logout.php" ><input type="button" value="Sign out" class="logout-btn btn-primary-soft btn"></a>
                                 </td>
                             </tr>
                     </table>
@@ -110,12 +110,12 @@
                     </td>
                     <td width="15%">
                         <p style="font-size: 14px;color: rgb(119, 119, 119);padding: 0;margin: 0;text-align: right;">
-                            Today's Date
+                            Today's date
                         </p>
                         <p class="heading-sub12" style="padding: 0;margin: 0;">
                             <?php 
 
-                        date_default_timezone_set('Asia/Kolkata');
+                        date_default_timezone_set('Australia/Melbourne');
 
                         $today = date('Y-m-d');
                         echo $today;
@@ -135,8 +135,8 @@
                 <!-- <tr>
                     <td colspan="4" >
                         <div style="display: flex;margin-top: 40px;">
-                        <div class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49);margin-top: 5px;">Schedule a Session</div>
-                        <a href="?action=add-session&id=none&error=0" class="non-style-link"><button  class="login-btn btn-primary btn button-icon"  style="margin-left:25px;background-image: url('../img/icons/add.svg');">Add a Session</font></button>
+                        <div class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49);margin-top: 5px;">Schedule a new session</div>
+                        <a href="?action=add-session&id=none&error=0" class="non-style-link"><button  class="login-btn btn-primary btn button-icon"  style="margin-left:25px;background-image: url('../img/icons/add.svg');">Add session</font></button>
                         </a>
                         </div>
                     </td>
@@ -144,7 +144,7 @@
                 <tr>
                     <td colspan="4" style="padding-top:10px;width: 100%;" >
                     
-                        <p class="heading-main12" style="margin-left: 45px;font-size:18px;color:rgb(49, 49, 49)">My Appointments (<?php echo $list110->num_rows; ?>)</p>
+                        <p class="heading-main12" style="margin-left: 45px;font-size:18px;color:rgb(49, 49, 49)">My appointments (<?php echo $list110->num_rows; ?>)</p>
                     </td>
                     
                 </tr>
@@ -157,7 +157,7 @@
 
                            </td> 
                         <td width="5%" style="text-align: center;">
-                        Date:
+                        Date
                         </td>
                         <td width="30%">
                         <form action="" method="post">
@@ -191,7 +191,7 @@
 
                         
                         if(!empty($_POST["sheduledate"])){
-                            $sheduledate=$_POST["sheduledate"];
+                            $sheduledate=$database->real_escape_string((string)$_POST["sheduledate"]);
                             $sqlmain.=" and schedule.scheduledate='$sheduledate' ";
                         };
 
@@ -212,36 +212,36 @@
                         <thead>
                         <tr>
                                 <th class="table-headin">
-                                    Patient name
+                                    Patient
                                 </th>
                                 <th class="table-headin">
                                     
-                                    Appointment number
+                                    Appt. no.
                                     
                                 </th>
                                
                                 <th class="table-headin">
                                     
                                 
-                                    Session Title
+                                    Session
                                     
                                     </th>
                                 
                                 <th class="table-headin" >
                                     
-                                    Session Date & Time
+                                    Session date & time
                                     
                                 </th>
                                 
                                 <th class="table-headin">
                                     
-                                    Appointment Date
+                                    Booked on
                                     
                                 </th>
                                 
                                 <th class="table-headin">
                                     
-                                    Events
+                                    Actions
                                     
                                 </tr>
                         </thead>
@@ -260,8 +260,8 @@
                                     <img src="../img/notfound.svg" width="25%">
                                     
                                     <br>
-                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">We  couldnt find anything related to your keywords !</p>
-                                    <a class="non-style-link" href="appointment.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Show all Appointments &nbsp;</font></button>
+                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">No matching records were found.</p>
+                                    <a class="non-style-link" href="appointment.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; View all appointments &nbsp;</font></button>
                                     </a>
                                     </center>
                                     <br><br><br><br>
@@ -284,17 +284,17 @@
                                     echo '<tr >
                                         <td style="font-weight:600;"> &nbsp;'.
                                         
-                                        substr($pname,0,25)
+                                        substr((string)$pname,0,25)
                                         .'</td >
                                         <td style="text-align:center;font-size:23px;font-weight:500; color: var(--btnnicetext);">
                                         '.$apponum.'
                                         
                                         </td>
                                         <td>
-                                        '.substr($title,0,15).'
+                                        '.substr((string)$title,0,15).'
                                         </td>
                                         <td style="text-align:center;;">
-                                            '.substr($scheduledate,0,10).' @'.substr($scheduletime,0,5).'
+                                            '.substr((string)$scheduledate,0,10).' at '.substr((string)$scheduletime,0,5).'
                                         </td>
                                         
                                         <td style="text-align:center;">
@@ -306,7 +306,7 @@
                                         
                                         <!--<a href="?action=view&id='.$appoid.'" class="non-style-link"><button  class="btn-primary-soft btn button-icon btn-view"  style="padding-left: 40px;padding-top: 12px;padding-bottom: 12px;margin-top: 10px;"><font class="tn-in-text">View</font></button></a>
                                        &nbsp;&nbsp;&nbsp;-->
-                                       <a href="?action=drop&id='.$appoid.'&name='.$pname.'&session='.$title.'&apponum='.$apponum.'" class="non-style-link"><button  class="btn-primary-soft btn button-icon btn-delete"  style="padding-left: 40px;padding-top: 12px;padding-bottom: 12px;margin-top: 10px;"><font class="tn-in-text">Cancel</font></button></a>
+                                       <a href="?action=drop&id='.$appoid.'&name='.urlencode($pname).'&session='.urlencode($title).'&apponum='.$apponum.'" class="non-style-link"><button  class="btn-primary-soft btn button-icon btn-delete"  style="padding-left: 40px;padding-top: 12px;padding-bottom: 12px;margin-top: 10px;"><font class="tn-in-text">Cancel</font></button></a>
                                        &nbsp;&nbsp;&nbsp;</div>
                                         </td>
                                     </tr>';
@@ -332,8 +332,8 @@
     <?php
     
     if($_GET){
-        $id=$_GET["id"];
-        $action=$_GET["action"];
+        $id=htmlspecialchars((string)($_GET["id"] ?? ''), ENT_QUOTES, 'UTF-8');
+        $action=(string)($_GET["action"] ?? '');
         if($action=='add-session'){
 
             echo '
@@ -355,30 +355,30 @@
 
                             <tr>
                                 <td>
-                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Add New Session.</p><br>
+                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Add a new session</p><br>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
                                 <form action="add-session.php" method="POST" class="add-new-form">
-                                    <label for="title" class="form-label">Session Title : </label>
+                                    <label for="title" class="form-label">Session title</label>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <input type="text" name="title" class="input-text" placeholder="Name of this Session" required><br>
+                                    <input type="text" name="title" class="input-text" placeholder="e.g. Morning Clinic" required><br>
                                 </td>
                             </tr>
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="docid" class="form-label">Select Doctor: </label>
+                                    <label for="docid" class="form-label">Doctor</label>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
                                     <select name="docid" id="" class="box" >
-                                    <option value="" disabled selected hidden>Choose Doctor Name from the list</option><br/>';
+                                    <option value="" disabled selected hidden>Select a doctor</option><br/>';
                                         
         
                                         $list11 = $database->query("select  * from  doctor;");
@@ -398,17 +398,17 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="nop" class="form-label">Number of Patients/Appointment Numbers : </label>
+                                    <label for="nop" class="form-label">Maximum number of patients</label>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <input type="number" name="nop" class="input-text" min="0"  placeholder="The final appointment number for this session depends on this number" required><br>
+                                    <input type="number" name="nop" class="input-text" min="0"  placeholder="e.g. 20" required><br>
                                 </td>
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="date" class="form-label">Session Date: </label>
+                                    <label for="date" class="form-label">Session date</label>
                                 </td>
                             </tr>
                             <tr>
@@ -418,7 +418,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="time" class="form-label">Schedule Time: </label>
+                                    <label for="time" class="form-label">Start time</label>
                                 </td>
                             </tr>
                             <tr>
@@ -429,9 +429,9 @@
                            
                             <tr>
                                 <td colspan="2">
-                                    <input type="reset" value="Reset" class="login-btn btn-primary-soft btn" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                    <input type="reset" value="Clear" class="login-btn btn-primary-soft btn" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                 
-                                    <input type="submit" value="Place this Session" class="login-btn btn-primary btn" name="shedulesubmit">
+                                    <input type="submit" value="Create session" class="login-btn btn-primary btn" name="shedulesubmit">
                                 </td>
                 
                             </tr>
@@ -447,16 +447,16 @@
             </div>
             ';
         }elseif($action=='session-added'){
-            $titleget=$_GET["title"];
+            $titleget=htmlspecialchars((string)($_GET["title"] ?? ''), ENT_QUOTES, 'UTF-8');
             echo '
             <div id="popup1" class="overlay">
                     <div class="popup">
                     <center>
                     <br><br>
-                        <h2>Session Placed.</h2>
+                        <h2>Session created</h2>
                         <a class="close" href="schedule.php">&times;</a>
                         <div class="content">
-                        '.substr($titleget,0,40).' was scheduled.<br><br>
+                        The session &ldquo;'.substr((string)$titleget,0,40).'&rdquo; has been scheduled successfully.<br><br>
                             
                         </div>
                         <div style="display: flex;justify-content: center;">
@@ -469,24 +469,24 @@
             </div>
             ';
         }elseif($action=='drop'){
-            $nameget=$_GET["name"];
-            $session=$_GET["session"];
-            $apponum=$_GET["apponum"];
+            $nameget=htmlspecialchars((string)($_GET["name"] ?? ''), ENT_QUOTES, 'UTF-8');
+            $session=htmlspecialchars((string)($_GET["session"] ?? ''), ENT_QUOTES, 'UTF-8');
+            $apponum=htmlspecialchars((string)($_GET["apponum"] ?? ''), ENT_QUOTES, 'UTF-8');
             echo '
             <div id="popup1" class="overlay">
                     <div class="popup">
                     <center>
-                        <h2>Are you sure?</h2>
+                        <h2>Please confirm</h2>
                         <a class="close" href="appointment.php">&times;</a>
                         <div class="content">
-                            You want to delete this record<br><br>
-                            Patient Name: &nbsp;<b>'.substr($nameget,0,40).'</b><br>
-                            Appointment number &nbsp; : <b>'.substr($apponum,0,40).'</b><br><br>
+                            Are you sure you want to cancel this appointment?<br><br>
+                            Patient: &nbsp;<b>'.substr((string)$nameget,0,40).'</b><br>
+                            Appointment no.: &nbsp; <b>'.substr((string)$apponum,0,40).'</b><br><br>
                             
                         </div>
                         <div style="display: flex;justify-content: center;">
-                        <a href="delete-appointment.php?id='.$id.'" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"<font class="tn-in-text">&nbsp;Yes&nbsp;</font></button></a>&nbsp;&nbsp;&nbsp;
-                        <a href="appointment.php" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;No&nbsp;&nbsp;</font></button></a>
+                        <a href="delete-appointment.php?id='.$id.'" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;Yes, cancel appointment&nbsp;</font></button></a>&nbsp;&nbsp;&nbsp;
+                        <a href="appointment.php" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;Keep appointment&nbsp;&nbsp;</font></button></a>
 
                         </div>
                     </center>
@@ -511,9 +511,9 @@
                     <div class="popup">
                     <center>
                         <h2></h2>
-                        <a class="close" href="doctors.php">&times;</a>
+                        <a class="close" href="appointment.php">&times;</a>
                         <div class="content">
-                            eDoc Web App<br>
+                            eDoc<br>
                             
                         </div>
                         <div style="display: flex;justify-content: center;">
@@ -521,14 +521,14 @@
                         
                             <tr>
                                 <td>
-                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">View Details.</p><br><br>
+                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Details</p><br><br>
                                 </td>
                             </tr>
                             
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="name" class="form-label">Name: </label>
+                                    <label for="name" class="form-label">Full name</label>
                                 </td>
                             </tr>
                             <tr>
@@ -539,7 +539,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Email" class="form-label">Email: </label>
+                                    <label for="Email" class="form-label">Email address</label>
                                 </td>
                             </tr>
                             <tr>
@@ -549,7 +549,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="nic" class="form-label">NIC: </label>
+                                    <label for="nic" class="form-label">NIC number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -559,7 +559,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Tele" class="form-label">Telephone: </label>
+                                    <label for="Tele" class="form-label">Phone number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -569,7 +569,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="spec" class="form-label">Specialties: </label>
+                                    <label for="spec" class="form-label">Specialty</label>
                                     
                                 </td>
                             </tr>
@@ -580,7 +580,7 @@
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="doctors.php"><input type="button" value="OK" class="login-btn btn-primary-soft btn" ></a>
+                                    <a href="appointment.php"><input type="button" value="OK" class="login-btn btn-primary-soft btn" ></a>
                                 
                                     
                                 </td>

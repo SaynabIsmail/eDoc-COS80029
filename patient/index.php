@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/main.css">  
     <link rel="stylesheet" href="../css/admin.css">
         
-    <title>Dashboard</title>
+    <title>Dashboard | eDoc</title>
     <style>
         .dashbord-tables{
             animation: transitionIn-Y-over 0.5s;
@@ -32,13 +32,13 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='p'){
-            header("location: ../login.php");
+            header("location: ../login.php"); exit;
         }else{
             $useremail=$_SESSION["user"];
         }
 
     }else{
-        header("location: ../login.php");
+        header("location: ../login.php"); exit;
     }
     
 
@@ -71,13 +71,13 @@
                                     <img src="../img/user.png" alt="" width="100%" style="border-radius:50%">
                                 </td>
                                 <td style="padding:0px;margin:0px;">
-                                    <p class="profile-title"><?php echo substr($username,0,13)  ?>..</p>
-                                    <p class="profile-subtitle"><?php echo substr($useremail,0,22)  ?></p>
+                                    <p class="profile-title"><?php echo htmlspecialchars((string)$username) ?></p>
+                                    <p class="profile-subtitle"><?php echo substr((string)$useremail,0,22)  ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="../logout.php" ><input type="button" value="Log out" class="logout-btn btn-primary-soft btn"></a>
+                                    <a href="../logout.php" ><input type="button" value="Sign out" class="logout-btn btn-primary-soft btn"></a>
                                 </td>
                             </tr>
                     </table>
@@ -85,23 +85,23 @@
                 </tr>
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-home menu-active menu-icon-home-active" >
-                        <a href="index.php" class="non-style-link-menu non-style-link-menu-active"><div><p class="menu-text">Home</p></a></div></a>
+                        <a href="index.php" class="non-style-link-menu non-style-link-menu-active"><div><p class="menu-text">Dashboard</p></a></div></a>
                     </td>
                 </tr>
                 <tr class="menu-row">
                     <td class="menu-btn menu-icon-doctor">
-                        <a href="doctors.php" class="non-style-link-menu"><div><p class="menu-text">All Doctors</p></a></div>
+                        <a href="doctors.php" class="non-style-link-menu"><div><p class="menu-text">Find a Doctor</p></a></div>
                     </td>
                 </tr>
                 
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-session">
-                        <a href="schedule.php" class="non-style-link-menu"><div><p class="menu-text">Scheduled Sessions</p></div></a>
+                        <a href="schedule.php" class="non-style-link-menu"><div><p class="menu-text">Available Sessions</p></div></a>
                     </td>
                 </tr>
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-appoinment">
-                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">My Bookings</p></a></div>
+                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">My Appointments</p></a></div>
                     </td>
                 </tr>
                 <tr class="menu-row" >
@@ -118,7 +118,7 @@
                         <tr >
                             
                             <td colspan="1" class="nav-bar" >
-                            <p style="font-size: 23px;padding-left:12px;font-weight: 600;margin-left:20px;">Home</p>
+                            <p style="font-size: 23px;padding-left:12px;font-weight: 600;margin-left:20px;">Dashboard</p>
                           
                             </td>
                             <td width="25%">
@@ -126,11 +126,11 @@
                             </td>
                             <td width="15%">
                                 <p style="font-size: 14px;color: rgb(119, 119, 119);padding: 0;margin: 0;text-align: right;">
-                                    Today's Date
+                                    Today's date
                                 </p>
                                 <p class="heading-sub12" style="padding: 0;margin: 0;">
                                     <?php 
-                                date_default_timezone_set('Asia/Kolkata');
+                                date_default_timezone_set('Australia/Melbourne');
         
                                 $today = date('Y-m-d');
                                 echo $today;
@@ -158,18 +158,17 @@
                     <table class="filter-container doctor-header patient-header" style="border: none;width:95%" border="0" >
                     <tr>
                         <td >
-                            <h3>Welcome!</h3>
-                            <h1><?php echo $username  ?>.</h1>
-                            <p>Haven't any idea about doctors? no problem let's jumping to 
-                                <a href="doctors.php" class="non-style-link"><b>"All Doctors"</b></a> section or 
-                                <a href="schedule.php" class="non-style-link"><b>"Sessions"</b> </a><br>
-                                Track your past and future appointments history.<br>Also find out the expected arrival time of your doctor or medical consultant.<br><br>
+                            <h3>Welcome back,</h3>
+                            <h1><?php echo htmlspecialchars((string)$username) ?></h1>
+                            <p>Browse our <a href="doctors.php" class="non-style-link"><b>doctors</b></a> or view all
+                                <a href="schedule.php" class="non-style-link"><b>available sessions</b></a> to book a consultation.<br>
+                                You can also review, reschedule or cancel your appointments at any time from <a href="appointment.php" class="non-style-link"><b>My Appointments</b></a>.<br><br>
                             </p>
                             
-                            <h3>Channel a Doctor Here</h3>
+                            <h3>Book an appointment</h3>
                             <form action="schedule.php" method="post" style="display: flex">
 
-                                <input type="search" name="search" class="input-text " placeholder="Search Doctor and We will Find The Session Available" list="doctors" style="width:45%;">&nbsp;&nbsp;
+                                <input type="search" name="search" class="input-text " placeholder="Search for a doctor to see available sessions" list="doctors" style="width:45%;">&nbsp;&nbsp;
                                 
                                 <?php
                                     echo '<datalist id="doctors">';
@@ -214,7 +213,7 @@
                                         <table class="filter-container" style="border: none;" border="0">
                                             <tr>
                                                 <td colspan="4">
-                                                    <p style="font-size: 20px;font-weight:600;padding-left: 12px;">Status</p>
+                                                    <p style="font-size: 20px;font-weight:600;padding-left: 12px;">Overview</p>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -225,7 +224,7 @@
                                                                     <?php    echo $doctorrow->num_rows  ?>
                                                                 </div><br>
                                                                 <div class="h3-dashboard">
-                                                                    All Doctors &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                    Doctors &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                                                 </div>
                                                         </div>
                                                                 <div class="btn-icon-back dashboard-icons" style="background-image: url('../img/icons/doctors-hover.svg');"></div>
@@ -238,7 +237,7 @@
                                                                     <?php    echo $patientrow->num_rows  ?>
                                                                 </div><br>
                                                                 <div class="h3-dashboard">
-                                                                    All Patients &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                    Patients &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                                                 </div>
                                                         </div>
                                                                 <div class="btn-icon-back dashboard-icons" style="background-image: url('../img/icons/patients-hover.svg');"></div>
@@ -253,7 +252,7 @@
                                                                     <?php    echo $appointmentrow ->num_rows  ?>
                                                                 </div><br>
                                                                 <div class="h3-dashboard" >
-                                                                    NewBooking &nbsp;&nbsp;
+                                                                    New bookings &nbsp;&nbsp;
                                                                 </div>
                                                         </div>
                                                                 <div class="btn-icon-back dashboard-icons" style="margin-left: 0px;background-image: url('../img/icons/book-hover.svg');"></div>
@@ -268,7 +267,7 @@
                                                                     <?php    echo $schedulerow ->num_rows  ?>
                                                                 </div><br>
                                                                 <div class="h3-dashboard" style="font-size: 15px">
-                                                                    Today Sessions
+                                                                    Today's sessions
                                                                 </div>
                                                         </div>
                                                                 <div class="btn-icon-back dashboard-icons" style="background-image: url('../img/icons/session-iceblue.svg');"></div>
@@ -291,7 +290,7 @@
 
 
                             
-                                    <p style="font-size: 20px;font-weight:600;padding-left: 40px;" class="anime">Your Upcoming Booking</p>
+                                    <p style="font-size: 20px;font-weight:600;padding-left: 40px;" class="anime">Your upcoming appointments</p>
                                     <center>
                                         <div class="abc scroll" style="height: 250px;padding: 0;margin: 0;">
                                         <table width="85%" class="sub-table scrolldown" border="0" >
@@ -301,13 +300,13 @@
                                         <th class="table-headin">
                                                     
                                                 
-                                                    Appoint. Number
+                                                    Appt. no.
                                                     
                                                     </th>
                                                 <th class="table-headin">
                                                     
                                                 
-                                                Session Title
+                                                Session
                                                 
                                                 </th>
                                                 
@@ -316,7 +315,7 @@
                                                 </th>
                                                 <th class="table-headin">
                                                     
-                                                    Sheduled Date & Time
+                                                    Date & time
                                                     
                                                 </th>
                                                     
@@ -338,8 +337,8 @@
                                                     <img src="../img/notfound.svg" width="25%">
                                                     
                                                     <br>
-                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">Nothing to show here!</p>
-                                                    <a class="non-style-link" href="schedule.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Channel a Doctor &nbsp;</font></button>
+                                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">You have no upcoming appointments.</p>
+                                                    <a class="non-style-link" href="schedule.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Book an appointment &nbsp;</font></button>
                                                     </a>
                                                     </center>
                                                     <br><br><br><br>
@@ -362,13 +361,13 @@
                                                         $apponum
                                                         .'</td>
                                                         <td style="padding:20px;"> &nbsp;'.
-                                                        substr($title,0,30)
+                                                        substr((string)$title,0,30)
                                                         .'</td>
                                                         <td>
-                                                        '.substr($docname,0,20).'
+                                                        '.substr((string)$docname,0,20).'
                                                         </td>
                                                         <td style="text-align:center;">
-                                                            '.substr($scheduledate,0,10).' '.substr($scheduletime,0,5).'
+                                                            '.substr((string)$scheduledate,0,10).' '.substr((string)$scheduletime,0,5).'
                                                         </td>
 
                 

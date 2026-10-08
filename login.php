@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/main.css">  
     <link rel="stylesheet" href="css/login.css">
         
-    <title>Login</title>
+    <title>Sign In | eDoc</title>
 
     
     
@@ -25,7 +25,7 @@
     $_SESSION["usertype"]="";
     
     // Set the new timezone
-    date_default_timezone_set('Asia/Kolkata');
+    date_default_timezone_set('Australia/Melbourne');
     $date = date('Y-m-d');
 
     $_SESSION["date"]=$date;
@@ -58,10 +58,10 @@
                     $_SESSION['user']=$email;
                     $_SESSION['usertype']='p';
                     
-                    header('location: patient/index.php');
+                    header('location: patient/index.php'); exit;
 
                 }else{
-                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Wrong credentials: Invalid email or password</label>';
+                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The email address or password you entered is incorrect.</label>';
                 }
 
             }elseif($utype=='a'){
@@ -74,10 +74,10 @@
                     $_SESSION['user']=$email;
                     $_SESSION['usertype']='a';
                     
-                    header('location: admin/index.php');
+                    header('location: admin/index.php'); exit;
 
                 }else{
-                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Wrong credentials: Invalid email or password</label>';
+                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The email address or password you entered is incorrect.</label>';
                 }
 
 
@@ -90,16 +90,16 @@
                     //   doctor dashbord
                     $_SESSION['user']=$email;
                     $_SESSION['usertype']='d';
-                    header('location: doctor/index.php');
+                    header('location: doctor/index.php'); exit;
 
                 }else{
-                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Wrong credentials: Invalid email or password</label>';
+                    $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The email address or password you entered is incorrect.</label>';
                 }
 
             }
             
         }else{
-            $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">We cant found any acount for this email.</label>';
+            $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The email address or password you entered is incorrect.</label>';
         }
 
 
@@ -123,35 +123,35 @@
         <table border="0" style="margin: 0;padding: 0;width: 60%;">
             <tr>
                 <td>
-                    <p class="header-text">Welcome Back!</p>
+                    <p class="header-text">Welcome back</p>
                 </td>
             </tr>
         <div class="form-body">
             <tr>
                 <td>
-                    <p class="sub-text">Login with your details to continue</p>
+                    <p class="sub-text">Sign in to your eDoc account to continue</p>
                 </td>
             </tr>
             <tr>
                 <form action="" method="POST" >
                 <td class="label-td">
-                    <label for="useremail" class="form-label">Email: </label>
+                    <label for="useremail" class="form-label">Email address</label>
                 </td>
             </tr>
             <tr>
                 <td class="label-td">
-                    <input type="email" name="useremail" class="input-text" placeholder="Email Address" required>
+                    <input type="email" id="useremail" name="useremail" class="input-text" placeholder="name@example.com" autocomplete="email" required>
                 </td>
             </tr>
             <tr>
                 <td class="label-td">
-                    <label for="userpassword" class="form-label">Password: </label>
+                    <label for="userpassword" class="form-label">Password</label>
                 </td>
             </tr>
 
             <tr>
                 <td class="label-td">
-                    <input type="Password" name="userpassword" class="input-text" placeholder="Password" required>
+                    <input type="password" id="userpassword" name="userpassword" class="input-text" placeholder="Password" autocomplete="current-password" required>
                 </td>
             </tr>
 
@@ -164,7 +164,25 @@
 
             <tr>
                 <td>
-                    <input type="submit" value="Login" class="login-btn btn-primary btn">
+                    <input type="submit" value="Sign in" class="login-btn btn-primary btn">
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 15px; text-align: center;">
+                    <a href="google-login.php" style="text-decoration: none;">
+                        <button type="button" class="login-btn btn-primary-soft btn" style="width: 100%;">
+                            Continue with Google
+                        </button>
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding-top: 10px; text-align: center;">
+                    <a href="login-microsoft.php" style="text-decoration: none;">
+                        <button type="button" class="login-btn btn-primary-soft btn" style="width: 100%;">
+                            Continue with Microsoft
+                        </button>
+                    </a>
                 </td>
             </tr>
         </div>
@@ -172,7 +190,7 @@
                 <td>
                     <br>
                     <label for="" class="sub-text" style="font-weight: 280;">Don't have an account&#63; </label>
-                    <a href="signup.php" class="hover-link1 non-style-link">Sign Up</a>
+                    <a href="signup.php" class="hover-link1 non-style-link">Create an account</a>
                     <br><br><br>
                 </td>
             </tr>

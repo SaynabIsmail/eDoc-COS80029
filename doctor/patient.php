@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="../css/main.css">  
     <link rel="stylesheet" href="../css/admin.css">
         
-    <title>Patients</title>
+    <title>My Patients | eDoc</title>
     <style>
         .popup{
             animation: transitionIn-Y-bottom 0.5s;
@@ -27,13 +27,13 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='d'){
-            header("location: ../login.php");
+            header("location: ../login.php"); exit;
         }else{
             $useremail=$_SESSION["user"];
         }
 
     }else{
-        header("location: ../login.php");
+        header("location: ../login.php"); exit;
     }
     
 
@@ -59,13 +59,13 @@
                                     <img src="../img/user.png" alt="" width="100%" style="border-radius:50%">
                                 </td>
                                 <td style="padding:0px;margin:0px;">
-                                    <p class="profile-title"><?php echo substr($username,0,13)  ?>..</p>
-                                    <p class="profile-subtitle"><?php echo substr($useremail,0,22)  ?></p>
+                                    <p class="profile-title"><?php echo htmlspecialchars((string)$username) ?></p>
+                                    <p class="profile-subtitle"><?php echo substr((string)$useremail,0,22)  ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                    <a href="../logout.php" ><input type="button" value="Log out" class="logout-btn btn-primary-soft btn"></a>
+                                    <a href="../logout.php" ><input type="button" value="Sign out" class="logout-btn btn-primary-soft btn"></a>
                                 </td>
                             </tr>
                     </table>
@@ -102,31 +102,33 @@
         </div>
         <?php       
 
-                    $selecttype="My";
-                    $current="My patients Only";
+                    $selecttype="My patients";
+                    $current="My patients only";
+                    // Default view: this doctor's own patients (each listed once).
+                    $sqlmain= "select distinct patient.* from appointment inner join patient on patient.pid=appointment.pid inner join schedule on schedule.scheduleid=appointment.scheduleid where schedule.docid=$userid;";
                     if($_POST){
 
-                        if(isset($_POST["search"])){
-                            $keyword=$_POST["search12"];
+                        if(isset($_POST["search"]) || isset($_POST["search12"])){
+                            $keyword=$database->real_escape_string(trim((string)$_POST["search12"]));
                             
                             $sqlmain= "select * from patient where pemail='$keyword' or pname='$keyword' or pname like '$keyword%' or pname like '%$keyword' or pname like '%$keyword%' ";
-                            $selecttype="my";
+                            $selecttype="Search results";
                         }
                         
                         if(isset($_POST["filter"])){
-                            if($_POST["showonly"]=='all'){
+                            if(($_POST["showonly"] ?? '')=='all'){
                                 $sqlmain= "select * from patient";
-                                $selecttype="All";
+                                $selecttype="All patients";
                                 $current="All patients";
                             }else{
-                                $sqlmain= "select * from appointment inner join patient on patient.pid=appointment.pid inner join schedule on schedule.scheduleid=appointment.scheduleid where schedule.docid=$userid;";
-                                $selecttype="My";
-                                $current="My patients Only";
+                                $sqlmain= "select distinct patient.* from appointment inner join patient on patient.pid=appointment.pid inner join schedule on schedule.scheduleid=appointment.scheduleid where schedule.docid=$userid;";
+                                $selecttype="My patients";
+                                $current="My patients only";
                             }
                         }
                     }else{
-                        $sqlmain= "select * from appointment inner join patient on patient.pid=appointment.pid inner join schedule on schedule.scheduleid=appointment.scheduleid where schedule.docid=$userid;";
-                        $selecttype="My";
+                        $sqlmain= "select distinct patient.* from appointment inner join patient on patient.pid=appointment.pid inner join schedule on schedule.scheduleid=appointment.scheduleid where schedule.docid=$userid;";
+                        $selecttype="My patients";
                     }
 
 
@@ -144,7 +146,7 @@
                         
                         <form action="" method="post" class="header-search">
 
-                            <input type="search" name="search12" class="input-text header-searchbar" placeholder="Search Patient name or Email" list="patient">&nbsp;&nbsp;
+                            <input type="search" name="search12" class="input-text header-searchbar" placeholder="Search by patient name or email" list="patient">&nbsp;&nbsp;
                             
                             <?php
                                 echo '<datalist id="patient">';
@@ -170,11 +172,11 @@
                     </td>
                     <td width="15%">
                         <p style="font-size: 14px;color: rgb(119, 119, 119);padding: 0;margin: 0;text-align: right;">
-                            Today's Date
+                            Today's date
                         </p>
                         <p class="heading-sub12" style="padding: 0;margin: 0;">
                             <?php 
-                        date_default_timezone_set('Asia/Kolkata');
+                        date_default_timezone_set('Australia/Melbourne');
 
                         $date = date('Y-m-d');
                         echo $date;
@@ -191,7 +193,7 @@
                 
                 <tr>
                     <td colspan="4" style="padding-top:10px;">
-                        <p class="heading-main12" style="margin-left: 45px;font-size:18px;color:rgb(49, 49, 49)"><?php echo $selecttype." Patients (".$list11->num_rows.")"; ?></p>
+                        <p class="heading-main12" style="margin-left: 45px;font-size:18px;color:rgb(49, 49, 49)"><?php echo $selecttype." (".$list11->num_rows.")"; ?></p>
                     </td>
                     
                 </tr>
@@ -203,13 +205,13 @@
                         <form action="" method="post">
                         
                         <td  style="text-align: right;">
-                        Show Details About : &nbsp;
+                        Show: &nbsp;
                         </td>
                         <td width="30%">
                         <select name="showonly" id="" class="box filter-container-items" style="width:90% ;height: 37px;margin: 0;" >
                                     <option value="" disabled selected hidden><?php echo $current   ?></option><br/>
-                                    <option value="my">My Patients Only</option><br/>
-                                    <option value="all">All Patients</option><br/>
+                                    <option value="my">My patients only</option><br/>
+                                    <option value="all">All patients</option><br/>
                                     
 
                         </select>
@@ -249,7 +251,7 @@
                                 <th class="table-headin">
                                 
                             
-                                Telephone
+                                Phone
                                 
                                 </th>
                                 <th class="table-headin">
@@ -257,12 +259,12 @@
                                 </th>
                                 <th class="table-headin">
                                     
-                                    Date of Birth
+                                    Date of birth
                                     
                                 </th>
                                 <th class="table-headin">
                                     
-                                    Events
+                                    Actions
                                     
                                 </tr>
                         </thead>
@@ -281,8 +283,8 @@
                                     <img src="../img/notfound.svg" width="25%">
                                     
                                     <br>
-                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">We  couldnt find anything related to your keywords !</p>
-                                    <a class="non-style-link" href="patient.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; Show all Patients &nbsp;</font></button>
+                                    <p class="heading-main12" style="margin-left: 45px;font-size:20px;color:rgb(49, 49, 49)">No matching records were found.</p>
+                                    <a class="non-style-link" href="patient.php"><button  class="login-btn btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin-left:20px;">&nbsp; View all patients &nbsp;</font></button>
                                     </a>
                                     </center>
                                     <br><br><br><br>
@@ -302,19 +304,19 @@
                                     
                                     echo '<tr>
                                         <td> &nbsp;'.
-                                        substr($name,0,35)
+                                        substr((string)$name,0,35)
                                         .'</td>
                                         <td>
-                                        '.substr($nic,0,12).'
+                                        '.substr((string)$nic,0,12).'
                                         </td>
                                         <td>
-                                            '.substr($tel,0,10).'
+                                            '.substr((string)$tel,0,10).'
                                         </td>
                                         <td>
-                                        '.substr($email,0,20).'
+                                        '.substr((string)$email,0,20).'
                                          </td>
                                         <td>
-                                        '.substr($dob,0,10).'
+                                        '.substr((string)$dob,0,10).'
                                         </td>
                                         <td >
                                         <div style="display:flex;justify-content: center;">
@@ -346,8 +348,8 @@
     <?php 
     if($_GET){
         
-        $id=$_GET["id"];
-        $action=$_GET["action"];
+        $id=htmlspecialchars((string)($_GET["id"] ?? ''), ENT_QUOTES, 'UTF-8');
+        $action=(string)($_GET["action"] ?? '');
             $sqlmain= "select * from patient where pid='$id'";
             $result= $database->query($sqlmain);
             $row=$result->fetch_assoc();
@@ -370,13 +372,13 @@
                         
                             <tr>
                                 <td>
-                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">View Details.</p><br><br>
+                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Details</p><br><br>
                                 </td>
                             </tr>
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="name" class="form-label">Patient ID: </label>
+                                    <label for="name" class="form-label">Patient ID</label>
                                 </td>
                             </tr>
                             <tr>
@@ -389,7 +391,7 @@
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="name" class="form-label">Name: </label>
+                                    <label for="name" class="form-label">Full name</label>
                                 </td>
                             </tr>
                             <tr>
@@ -400,7 +402,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Email" class="form-label">Email: </label>
+                                    <label for="Email" class="form-label">Email address</label>
                                 </td>
                             </tr>
                             <tr>
@@ -410,7 +412,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="nic" class="form-label">NIC: </label>
+                                    <label for="nic" class="form-label">NIC number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -420,7 +422,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Tele" class="form-label">Telephone: </label>
+                                    <label for="Tele" class="form-label">Phone number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -430,7 +432,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="spec" class="form-label">Address: </label>
+                                    <label for="spec" class="form-label">Address</label>
                                     
                                 </td>
                             </tr>
@@ -442,7 +444,7 @@
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="name" class="form-label">Date of Birth: </label>
+                                    <label for="name" class="form-label">Date of birth</label>
                                 </td>
                             </tr>
                             <tr>

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<?php ob_start(); ?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
 
 
-    <title>Settings</title>
+    <title>Account Settings | eDoc</title>
     <style>
         .dashbord-tables{
             animation: transitionIn-Y-over 0.5s;
@@ -34,13 +34,13 @@
 
     if(isset($_SESSION["user"])){
         if(($_SESSION["user"])=="" or $_SESSION['usertype']!='p'){
-            header("location: ../login.php");
+            header("location: ../login.php"); exit;
         }else{
             $useremail=$_SESSION["user"];
         }
 
     }else{
-        header("location: ../login.php");
+        header("location: ../login.php"); exit;
     }
     
 
@@ -67,13 +67,13 @@
                                     <img src="../img/user.png" alt="" width="100%" style="border-radius:50%">
                                 </td>
                                 <td style="padding:0px;margin:0px;">
-                                    <p class="profile-title"><?php echo substr($username,0,13)  ?>..</p>
-                                    <p class="profile-subtitle"><?php echo substr($useremail,0,22)  ?></p>
+                                    <p class="profile-title"><?php echo htmlspecialchars((string)$username) ?></p>
+                                    <p class="profile-subtitle"><?php echo substr((string)$useremail,0,22)  ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <td colspan="2">
-                                <a href="../logout.php" ><input type="button" value="Log out" class="logout-btn btn-primary-soft btn"></a>
+                                <a href="../logout.php" ><input type="button" value="Sign out" class="logout-btn btn-primary-soft btn"></a>
                                 </td>
                             </tr>
                     </table>
@@ -82,23 +82,23 @@
                 </tr>
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-home " >
-                        <a href="index.php" class="non-style-link-menu "><div><p class="menu-text">Home</p></a></div></a>
+                        <a href="index.php" class="non-style-link-menu "><div><p class="menu-text">Dashboard</p></a></div></a>
                     </td>
                 </tr>
                 <tr class="menu-row">
                     <td class="menu-btn menu-icon-doctor">
-                        <a href="doctors.php" class="non-style-link-menu"><div><p class="menu-text">All Doctors</p></a></div>
+                        <a href="doctors.php" class="non-style-link-menu"><div><p class="menu-text">Find a Doctor</p></a></div>
                     </td>
                 </tr>
                 
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-session">
-                        <a href="schedule.php" class="non-style-link-menu"><div><p class="menu-text">Scheduled Sessions</p></div></a>
+                        <a href="schedule.php" class="non-style-link-menu"><div><p class="menu-text">Available Sessions</p></div></a>
                     </td>
                 </tr>
                 <tr class="menu-row" >
                     <td class="menu-btn menu-icon-appoinment">
-                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">My Bookings</p></a></div>
+                        <a href="appointment.php" class="non-style-link-menu"><div><p class="menu-text">My Appointments</p></a></div>
                     </td>
                 </tr>
                 <tr class="menu-row" >
@@ -124,11 +124,11 @@
                     
                             <td width="15%">
                                 <p style="font-size: 14px;color: rgb(119, 119, 119);padding: 0;margin: 0;text-align: right;">
-                                    Today's Date
+                                    Today's date
                                 </p>
                                 <p class="heading-sub12" style="padding: 0;margin: 0;">
                                     <?php 
-                                date_default_timezone_set('Asia/Kolkata');
+                                date_default_timezone_set('Australia/Melbourne');
         
                                 $today = date('Y-m-d');
                                 echo $today;
@@ -170,7 +170,7 @@
 
                                                 </div><br>
                                                 <div class="h3-dashboard" style="font-size: 15px;">
-                                                    Edit your Account Details & Change Password
+                                                    Update your personal details and change your password
                                                 </div>
                                         </div>
                                                 
@@ -192,11 +192,11 @@
                                         <div class="btn-icon-back dashboard-icons-setting " style="background-image: url('../img/icons/view-iceblue.svg');"></div>
                                         <div>
                                                 <div class="h1-dashboard" >
-                                                    View Account Details
+                                                    View account details
                                                     
                                                 </div><br>
                                                 <div class="h3-dashboard"  style="font-size: 15px;">
-                                                    View Personal information About Your Account
+                                                    Review the personal information held in your account
                                                 </div>
                                         </div>
                                                 
@@ -212,16 +212,16 @@
                             </tr>
                             <tr>
                             <td style="width: 25%;">
-                                    <a href="?action=drop&id=<?php echo $userid.'&name='.$username ?>" class="non-style-link">
+                                    <a href="?action=drop&id=<?php echo $userid.'&name='.urlencode($username) ?>" class="non-style-link">
                                     <div  class="dashboard-items setting-tabs"  style="padding:20px;margin:auto;width:95%;display: flex;">
                                         <div class="btn-icon-back dashboard-icons-setting" style="background-image: url('../img/icons/patients-hover.svg');"></div>
                                         <div>
                                                 <div class="h1-dashboard" style="color: #ff5050;">
-                                                    Delete Account
+                                                    Delete account
                                                     
                                                 </div><br>
                                                 <div class="h3-dashboard"  style="font-size: 15px;">
-                                                    Will Permanently Remove your Account
+                                                    Permanently delete your account and associated bookings
                                                 </div>
                                         </div>
                                                 
@@ -241,23 +241,23 @@
     <?php 
     if($_GET){
         
-        $id=$_GET["id"];
-        $action=$_GET["action"];
+        $id=(int)$userid; // your own account only
+        $action=(string)($_GET["action"] ?? '');
         if($action=='drop'){
-            $nameget=$_GET["name"];
+            $nameget=htmlspecialchars((string)($_GET["name"] ?? ''), ENT_QUOTES, 'UTF-8');
             echo '
             <div id="popup1" class="overlay">
                     <div class="popup">
                     <center>
-                        <h2>Are you sure?</h2>
+                        <h2>Please confirm</h2>
                         <a class="close" href="settings.php">&times;</a>
                         <div class="content">
-                            You want to delete Your Account<br>('.substr($nameget,0,40).').
+                            Are you sure you want to permanently delete your account?<br><b>'.substr((string)$nameget,0,40).'</b><br><br>All of your bookings will also be cancelled. This cannot be undone.
                             
                         </div>
                         <div style="display: flex;justify-content: center;">
-                        <a href="delete-account.php?id='.$id.'" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"<font class="tn-in-text">&nbsp;Yes&nbsp;</font></button></a>&nbsp;&nbsp;&nbsp;
-                        <a href="settings.php" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;No&nbsp;&nbsp;</font></button></a>
+                        <a href="delete-account.php?id='.$id.'" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;Yes, delete my account&nbsp;</font></button></a>&nbsp;&nbsp;&nbsp;
+                        <a href="settings.php" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;Go back&nbsp;&nbsp;</font></button></a>
 
                         </div>
                     </center>
@@ -286,7 +286,7 @@
                         <h2></h2>
                         <a class="close" href="settings.php">&times;</a>
                         <div class="content">
-                            eDoc Web App<br>
+                            eDoc<br>
                             
                         </div>
                         <div style="display: flex;justify-content: center;">
@@ -294,14 +294,14 @@
                         
                             <tr>
                                 <td>
-                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">View Details.</p><br><br>
+                                    <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Details</p><br><br>
                                 </td>
                             </tr>
                             
                             <tr>
                                 
                                 <td class="label-td" colspan="2">
-                                    <label for="name" class="form-label">Name: </label>
+                                    <label for="name" class="form-label">Full name</label>
                                 </td>
                             </tr>
                             <tr>
@@ -312,7 +312,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Email" class="form-label">Email: </label>
+                                    <label for="Email" class="form-label">Email address</label>
                                 </td>
                             </tr>
                             <tr>
@@ -322,7 +322,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="nic" class="form-label">NIC: </label>
+                                    <label for="nic" class="form-label">NIC number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -332,7 +332,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="Tele" class="form-label">Telephone: </label>
+                                    <label for="Tele" class="form-label">Phone number</label>
                                 </td>
                             </tr>
                             <tr>
@@ -342,7 +342,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="spec" class="form-label">Address: </label>
+                                    <label for="spec" class="form-label">Address</label>
                                     
                                 </td>
                             </tr>
@@ -353,7 +353,7 @@
                             </tr>
                             <tr>
                                 <td class="label-td" colspan="2">
-                                    <label for="spec" class="form-label">Date of Birth: </label>
+                                    <label for="spec" class="form-label">Date of birth</label>
                                     
                                 </td>
                             </tr>
@@ -395,11 +395,11 @@
             $nic=$row['pnic'];
             $tele=$row['ptel'];
 
-            $error_1=$_GET["error"];
+            $error_1=(string)($_GET["error"] ?? '');
                 $errorlist= array(
-                    '1'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Already have an account for this Email address.</label>',
-                    '2'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Password Conformation Error! Reconform Password</label>',
-                    '3'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;"></label>',
+                    '1'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">An account with this email address already exists.</label>',
+                    '2'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The passwords do not match. Please re-enter them.</label>',
+                    '3'=>'<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">Please check the details you entered and try again.</label>',
                     '4'=>"",
                     '0'=>'',
 
@@ -417,59 +417,59 @@
                                 <table width="80%" class="sub-table scrolldown add-doc-form-container" border="0">
                                 <tr>
                                         <td class="label-td" colspan="2">'.
-                                            $errorlist[$error_1]
+                                            ($errorlist[$error_1] ?? '')
                                         .'</td>
                                     </tr>
                                     <tr>
                                         <td>
-                                            <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Edit User Account Details.</p>
-                                        User ID : '.$id.' (Auto Generated)<br><br>
+                                            <p style="padding: 0;margin: 0;text-align: left;font-size: 25px;font-weight: 500;">Edit account details</p>
+                                        Patient ID: P-'.$id.'<br><br>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
                                             <form action="edit-user.php" method="POST" class="add-new-form">
-                                            <label for="Email" class="form-label">Email: </label>
+                                            <label for="Email" class="form-label">Email address</label>
                                             <input type="hidden" value="'.$id.'" name="id00">
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
                                         <input type="hidden" name="oldemail" value="'.$email.'" >
-                                        <input type="email" name="email" class="input-text" placeholder="Email Address" value="'.$email.'" required><br>
+                                        <input type="email" name="email" class="input-text" placeholder="Email address" value="'.$email.'" required><br>
                                         </td>
                                     </tr>
                                     <tr>
                                         
                                         <td class="label-td" colspan="2">
-                                            <label for="name" class="form-label">Name: </label>
+                                            <label for="name" class="form-label">Full name</label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <input type="text" name="name" class="input-text" placeholder="Doctor Name" value="'.$name.'" required><br>
+                                            <input type="text" name="name" class="input-text" placeholder="Full name" value="'.$name.'" required><br>
                                         </td>
                                         
                                     </tr>
                                     
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <label for="nic" class="form-label">NIC: </label>
+                                            <label for="nic" class="form-label">NIC number</label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <input type="text" name="nic" class="input-text" placeholder="NIC Number" value="'.$nic.'" required><br>
+                                            <input type="text" name="nic" class="input-text" placeholder="NIC number" value="'.$nic.'" required><br>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <label for="Tele" class="form-label">Telephone: </label>
+                                            <label for="Tele" class="form-label">Phone number</label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <input type="tel" name="Tele" class="input-text" placeholder="Telephone Number" value="'.$tele.'" required><br>
+                                            <input type="tel" name="Tele" class="input-text" placeholder="Phone number" value="'.$tele.'" required><br>
                                         </td>
                                     </tr>
                                     <tr>
@@ -485,28 +485,28 @@
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <label for="password" class="form-label">Password: </label>
+                                            <label for="password" class="form-label">Password</label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <input type="password" name="password" class="input-text" placeholder="Defind a Password" required><br>
+                                            <input type="password" name="password" class="input-text" placeholder="Enter a password" required><br>
                                         </td>
                                     </tr><tr>
                                         <td class="label-td" colspan="2">
-                                            <label for="cpassword" class="form-label">Conform Password: </label>
+                                            <label for="cpassword" class="form-label">Confirm password</label>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="label-td" colspan="2">
-                                            <input type="password" name="cpassword" class="input-text" placeholder="Conform Password" required><br>
+                                            <input type="password" name="cpassword" class="input-text" placeholder="Re-enter the password" required><br>
                                         </td>
                                     </tr>
                                     
                         
                                     <tr>
                                         <td colspan="2">
-                                            <input type="reset" value="Reset" class="login-btn btn-primary-soft btn" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                            <input type="reset" value="Clear" class="login-btn btn-primary-soft btn" >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                         
                                             <input type="submit" value="Save" class="login-btn btn-primary btn">
                                         </td>
@@ -529,16 +529,16 @@
                         <div class="popup">
                         <center>
                         <br><br><br><br>
-                            <h2>Edit Successfully!</h2>
+                            <h2>Changes saved successfully</h2>
                             <a class="close" href="settings.php">&times;</a>
                             <div class="content">
-                                If You change your email also Please logout and login again with your new email
+                                Your account details have been updated. If you changed your email address, please use the new address the next time you sign in.
                                 
                             </div>
                             <div style="display: flex;justify-content: center;">
                             
                             <a href="settings.php" class="non-style-link"><button  class="btn-primary btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;OK&nbsp;&nbsp;</font></button></a>
-                            <a href="../logout.php" class="non-style-link"><button  class="btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;Log out&nbsp;&nbsp;</font></button></a>
+                            <a href="../logout.php" class="non-style-link"><button  class="btn-primary-soft btn"  style="display: flex;justify-content: center;align-items: center;margin:10px;padding:10px;"><font class="tn-in-text">&nbsp;&nbsp;Sign out&nbsp;&nbsp;</font></button></a>
 
                             </div>
                             <br><br>
