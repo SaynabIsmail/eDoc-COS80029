@@ -1,79 +1,68 @@
+<?php
+// Saves the logged in patient's details (Settings > Edit).
+// Uses the id from the session, not the form. Error codes for settings.php:
+// 1 = email already used, 2 = passwords don't match, 3 = invalid input, 4 = saved
+ob_start();
+session_start();
 
-    <?php
-    
-    
+if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'p') {
+    header("location: ../login.php");
+    exit;
+}
+$useremail = $_SESSION['user'];
 
-    //import database
-    include("../connection.php");
+include("../connection.php");
 
+$stmt = $database->prepare("SELECT pid FROM patient WHERE pemail = ?");
+$stmt->bind_param("s", $useremail);
+$stmt->execute();
+$id = (int)($stmt->get_result()->fetch_assoc()['pid'] ?? 0);
 
+$error = '3';
+if ($id && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name      = trim((string)($_POST['name'] ?? ''));
+    $nic       = trim((string)($_POST['nic'] ?? ''));
+    $address   = trim((string)($_POST['address'] ?? ''));
+    $email     = strtolower(trim((string)($_POST['email'] ?? '')));
+    $tele      = trim((string)($_POST['Tele'] ?? ''));
+    $password  = (string)($_POST['password'] ?? '');
+    $cpassword = (string)($_POST['cpassword'] ?? '');
 
-    if($_POST){
-        //print_r($_POST);
-        $result= $database->query("select * from webuser");
-        $name=$_POST['name'];
-        $nic=$_POST['nic'];
-        $oldemail=$_POST["oldemail"];
-        $address=$_POST['address'];
-        $email=$_POST['email'];
-        $tele=$_POST['Tele'];
-        $password=$_POST['password'];
-        $cpassword=$_POST['cpassword'];
-        $id=$_POST['id00'];
-        
-        if ($password==$cpassword){
-            $error='3';
-
-            $sqlmain= "select patient.pid from patient inner join webuser on patient.pemail=webuser.email where webuser.email=?;";
-            $stmt = $database->prepare($sqlmain);
-            $stmt->bind_param("s",$email);
+    if ($password !== $cpassword) {
+        $error = '2';
+    } elseif ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $error = '3';
+    } else {
+        // email already used by someone else?
+        $stmt = $database->prepare("SELECT 1 FROM webuser WHERE email = ? AND email <> ?");
+        $stmt->bind_param("ss", $email, $useremail);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            $error = '1';
+        } else {
+            $stmt = $database->prepare(
+                "UPDATE patient SET pemail = ?, pname = ?, ppassword = ?, pnic = ?, ptel = ?, paddress = ? WHERE pid = ?"
+            );
+            $stmt->bind_param("ssssssi", $email, $name, $password, $nic, $tele, $address, $id);
             $stmt->execute();
-            $result = $stmt->get_result();
-            //$resultqq= $database->query("select * from doctor where docid='$id';");
-            if($result->num_rows==1){
-                $id2=$result->fetch_assoc()["pid"];
-            }else{
-                $id2=$id;
-            }
-            
 
-            if($id2!=$id){
-                $error='1';
-                //$resultqq1= $database->query("select * from doctor where docemail='$email';");
-                //$did= $resultqq1->fetch_assoc()["docid"];
-                //if($resultqq1->num_rows==1){
-                    
-            }else{
-
-                //$sql1="insert into doctor(docemail,docname,docpassword,docnic,doctel,specialties) values('$email','$name','$password','$nic','$tele',$spec);";
-                $sql1="update patient set pemail='$email',pname='$name',ppassword='$password',pnic='$nic',ptel='$tele',paddress='$address' where pid=$id ;";
-                $database->query($sql1);
-                echo $sql1;
-                $sql1="update webuser set email='$email' where email='$oldemail' ;";
-                $database->query($sql1);
-                echo $sql1;
-                
-                $error= '4';
-                
+            if ($email !== $useremail) {
+                foreach ([
+                    "UPDATE webuser SET email = ? WHERE email = ?",
+                    "UPDATE calendar_connections SET email = ? WHERE email = ?",
+                    "UPDATE appointment_calendar_events SET owner_email = ? WHERE owner_email = ?",
+                ] as $sql) {
+                    if ($stmt = $database->prepare($sql)) { // calendar tables exist only after setup.php
+                        $stmt->bind_param("ss", $email, $useremail);
+                        $stmt->execute();
+                    }
+                }
+                $_SESSION['user'] = $email;
             }
-            
-        }else{
-            $error='2';
+            $error = '4';
         }
-    
-    
-        
-        
-    }else{
-        //header('location: signup.php');
-        $error='3';
     }
-    
+}
 
-    header("location: settings.php?action=edit&error=".$error."&id=".$id);
-    ?>
-    
-   
-
-</body>
-</html>
+header("location: settings.php?action=edit&error=" . $error . "&id=" . $id);
+exit;

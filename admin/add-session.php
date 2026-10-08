@@ -1,30 +1,33 @@
 <?php
+// Admin adds a new session
+ob_start();
+session_start();
 
-    session_start();
+if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'a') {
+    header("location: ../login.php");
+    exit;
+}
 
-    if(isset($_SESSION["user"])){
-        if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
-        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    include("../connection.php");
+    $title = trim((string)($_POST["title"] ?? ''));
+    $docid = (string)(int)($_POST["docid"] ?? 0);
+    $nop   = max(1, (int)($_POST["nop"] ?? 0));
+    $date  = (string)($_POST["date"] ?? '');
+    $time  = (string)($_POST["time"] ?? '');
 
-    }else{
-        header("location: ../login.php");
-    }
-    
-    
-    if($_POST){
-        //import database
-        include("../connection.php");
-        $title=$_POST["title"];
-        $docid=$_POST["docid"];
-        $nop=$_POST["nop"];
-        $date=$_POST["date"];
-        $time=$_POST["time"];
-        $sql="insert into schedule (docid,title,scheduledate,scheduletime,nop) values ($docid,'$title','$date','$time',$nop);";
-        $result= $database->query($sql);
-        header("location: schedule.php?action=session-added&title=$title");
-        
+    $validDate = DateTime::createFromFormat('Y-m-d', $date);
+    $validTime = preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $time);
+    if ($title === '' || $docid === '0' || !$validDate || !$validTime) {
+        header("location: schedule.php?action=add-session&id=none&error=1");
+        exit;
     }
 
-
-?>
+    $stmt = $database->prepare("INSERT INTO schedule (docid, title, scheduledate, scheduletime, nop) VALUES (?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssi", $docid, $title, $date, $time, $nop);
+    $stmt->execute();
+    header("location: schedule.php?action=session-added&title=" . urlencode($title));
+    exit;
+}
+header("location: schedule.php");
+exit;
