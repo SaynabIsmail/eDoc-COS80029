@@ -1,28 +1,21 @@
 <?php
+ob_start();
+// Admin deletes an appointment (also removed from the patient's and doctor's calendar)
+session_start();
 
-    session_start();
+if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'a') {
+    header("location: ../login.php");
+    exit;
+}
 
-    if(isset($_SESSION["user"])){
-        if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
-        }
-
-    }else{
-        header("location: ../login.php");
-    }
-    
-    
-    if($_GET){
-        //import database
-        include("../connection.php");
-        $id=$_GET["id"];
-        //$result001= $database->query("select * from schedule where scheduleid=$id;");
-        //$email=($result001->fetch_assoc())["docemail"];
-        $sql= $database->query("delete from appointment where appoid='$id';");
-        //$sql= $database->query("delete from doctor where docemail='$email';");
-        //print_r($email);
-        header("location: appointment.php");
-    }
-
-
-?>
+if (isset($_GET["id"])) {
+    include("../connection.php");
+    require_once __DIR__ . '/../lib/calendar.php';
+    $id = (int)$_GET["id"];
+    calendar_remove_appointment($database, $id);
+    $stmt = $database->prepare("DELETE FROM appointment WHERE appoid = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+}
+header("location: appointment.php");
+exit;

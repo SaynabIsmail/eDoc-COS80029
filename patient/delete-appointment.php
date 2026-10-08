@@ -1,31 +1,30 @@
 <?php
+ob_start();
+// Patient cancels a booking, also removes it from their calendar.
+session_start();
 
-    session_start();
+if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'p') {
+    header("location: ../login.php");
+    exit;
+}
 
-    if(isset($_SESSION["user"])){
-        if(($_SESSION["user"])=="" or $_SESSION['usertype']!='a'){
-            header("location: ../login.php");
-        }
+if (isset($_GET["id"])) {
+    include("../connection.php");
+    require_once __DIR__ . '/../lib/calendar.php';
 
-    }else{
-        header("location: ../login.php");
-    }
-    
-    
-    if($_GET){
-        //import database
-        include("../connection.php");
-        $id=$_GET["id"];
-        //$result001= $database->query("select * from schedule where scheduleid=$id;");
-        //$email=($result001->fetch_assoc())["docemail"];
-        $sql= $database->query("delete from appointment where appoid='$id';");
-        $stmt = $database->prepare($sqlmain);
-        $stmt->bind_param("i",$id);
+    $id = (int)$_GET["id"];
+    // only allow cancelling your own appointment
+    $stmt = $database->prepare("SELECT a.appoid FROM appointment a JOIN patient p ON p.pid = a.pid WHERE a.appoid = ? AND p.pemail = ?");
+    $stmt->bind_param("is", $id, $_SESSION['user']);
+    $stmt->execute();
+    if ($stmt->get_result()->num_rows === 1) {
+        calendar_remove_appointment($database, $id);
+        $stmt = $database->prepare("DELETE FROM appointment WHERE appoid = ?");
+        $stmt->bind_param("i", $id);
         $stmt->execute();
-        //$sql= $database->query("delete from doctor where docemail='$email';");
-        //print_r($email);
-        header("location: appointment.php");
+        header("location: appointment.php?action=cancelled&id=" . $id);
+        exit;
     }
-
-
-?>
+}
+header("location: appointment.php");
+exit;
