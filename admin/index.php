@@ -93,6 +93,16 @@
                         <a href="patient.php" class="non-style-link-menu"><div><p class="menu-text">Patients</p></a></div>
                     </td>
                 </tr>
+                <tr class="menu-row" >
+                    <td class="menu-btn menu-icon-settings">
+                        <a href="manage-2fa.php" class="non-style-link-menu"><div><p class="menu-text">Doctor 2FA</p></a></div>
+                    </td>
+                </tr>
+                <tr class="menu-row" >
+                    <td class="menu-btn menu-icon-doctor">
+                        <a href="add-doctor.php" class="non-style-link-menu"><div><p class="menu-text">Add Doctor</p></a></div>
+                    </td>
+                </tr>
             </table>
         </div>
         <div class="dash-body" style="margin-top: 15px">

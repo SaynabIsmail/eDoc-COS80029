@@ -10,6 +10,7 @@ if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'd') {
 }
 
 include("../connection.php");
+include("require-2fa.php");
 
 $stmt = $database->prepare("SELECT docid FROM doctor WHERE docemail = ?");
 $stmt->bind_param("s", $_SESSION['user']);

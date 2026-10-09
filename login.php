@@ -85,12 +85,11 @@
                 //TODO
                 $checker = $database->query("select * from doctor where docemail='$email' and docpassword='$password'");
                 if ($checker->num_rows==1){
-
-
-                    //   doctor dashbord
-                    $_SESSION['user']=$email;
-                    $_SESSION['usertype']='d';
-                    header('location: doctor/index.php'); exit;
+                    // doctors go through 2FA first (verify-2fa.php sends them to set it up if they haven't yet)
+                    $docrow = $checker->fetch_assoc();
+                    $_SESSION['pending_2fa_docid'] = $docrow['docid'];
+                    $_SESSION['pending_2fa_email'] = $email;
+                    header('location: verify-2fa.php'); exit;
 
                 }else{
                     $error='<label for="promter" class="form-label" style="color:rgb(255, 62, 62);text-align:center;">The email address or password you entered is incorrect.</label>';

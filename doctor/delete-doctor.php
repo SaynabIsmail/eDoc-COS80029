@@ -9,6 +9,7 @@ if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'd') {
 }
 
 include("../connection.php");
+include("require-2fa.php");
 require_once __DIR__ . '/../lib/accounts.php';
 
 // use the logged in doctor, not an id from the URL

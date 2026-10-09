@@ -39,6 +39,7 @@
 
     //import database
     include("../connection.php");
+    include("require-2fa.php");
     $userrow = $database->query("select * from doctor where docemail='$useremail'");
     $userfetch=$userrow->fetch_assoc();
     $userid= $userfetch["docid"];

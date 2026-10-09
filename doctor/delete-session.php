@@ -10,6 +10,7 @@ if (empty($_SESSION['user']) || ($_SESSION['usertype'] ?? '') !== 'd') {
 
 if (isset($_GET["id"])) {
     include("../connection.php");
+    include("require-2fa.php");
     require_once __DIR__ . '/../lib/calendar.php';
     $id = (int)$_GET["id"];
 

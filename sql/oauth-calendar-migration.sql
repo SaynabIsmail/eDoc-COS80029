@@ -43,3 +43,20 @@ CREATE TABLE IF NOT EXISTS appointment_calendar_events (
   UNIQUE KEY uq_appo_owner (appoid, owner_email),
   KEY idx_owner (owner_email)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- doctor two-factor authentication (Manoj)
+CREATE TABLE IF NOT EXISTS doctor_2fa (
+  docid   INT NOT NULL,
+  secret  VARCHAR(255) NOT NULL,
+  enabled TINYINT(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (docid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS doctor_2fa_backup_codes (
+  id        INT NOT NULL AUTO_INCREMENT,
+  docid     INT NOT NULL,
+  code_hash VARCHAR(255) NOT NULL,
+  used      TINYINT(1) NOT NULL DEFAULT 0,
+  PRIMARY KEY (id),
+  KEY idx_docid (docid)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

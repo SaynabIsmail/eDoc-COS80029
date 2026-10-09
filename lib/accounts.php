@@ -46,6 +46,12 @@ function edoc_delete_doctor(mysqli $db, int $docid): bool
     $stmt->execute();
 
     edoc_forget_calendar_connections($db, $email);
+    foreach (["DELETE FROM doctor_2fa WHERE docid = ?", "DELETE FROM doctor_2fa_backup_codes WHERE docid = ?"] as $sql) {
+        if ($stmt = $db->prepare($sql)) { // 2FA tables only exist after setup.php
+            $stmt->bind_param("i", $docid);
+            $stmt->execute();
+        }
+    }
     $stmt = $db->prepare("DELETE FROM webuser WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();

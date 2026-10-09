@@ -20,6 +20,8 @@ check('PHP ' . PHP_VERSION, version_compare(PHP_VERSION, '8.0.0', '>='), 'Needs 
 foreach (['mysqli', 'curl', 'openssl', 'json'] as $ext) {
     check("PHP extension: $ext", extension_loaded($ext));
 }
+check('PHP extension: gd (QR codes for doctor 2FA)', extension_loaded('gd'), 'Enable extension=gd in php.ini and restart MAMP.');
+check('Composer packages for doctor 2FA (vendor/)', is_file(__DIR__ . '/vendor/autoload.php'), 'Run "composer install" in this folder.');
 
 // ---- 2. config.php ---------------------------------------------------------
 $cfgFile = __DIR__ . '/config.php';
@@ -99,7 +101,7 @@ if ($dbOk) {
                 }
             }
         }
-        // The two new tables (CREATE TABLE IF NOT EXISTS in the migration file)
+        // new tables (CREATE TABLE IF NOT EXISTS in the migration file)
         $file = file_get_contents(__DIR__ . '/sql/oauth-calendar-migration.sql');
         preg_match_all('/CREATE TABLE IF NOT EXISTS.*?;/s', $file, $m);
         foreach ($m[0] as $create) {
@@ -117,6 +119,8 @@ if ($dbOk) {
             && $server->query("SHOW TABLES LIKE 'appointment_calendar_events'")->num_rows
             && $col('webuser', 'google_sub') && $col('webuser', 'microsoft_sub');
         check('Sign-in and calendar tables', (bool)$ready);
+        check('Doctor 2FA tables', $server->query("SHOW TABLES LIKE 'doctor_2fa'")->num_rows
+            && $server->query("SHOW TABLES LIKE 'doctor_2fa_backup_codes'")->num_rows > 0);
 
         // remove the old untitled test sessions from the demo data (only if nobody booked them)
         $server->query("DELETE FROM schedule WHERE scheduleid BETWEEN 2 AND 8 AND title IN ('1','12')
