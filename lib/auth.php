@@ -91,15 +91,34 @@ function federated_signin(mysqli $db, string $provider): void
     $name  = $id['name'] !== '' ? $id['name'] : strstr($id['email'], '@', true);
     $phone = $id['phone'] ? substr(preg_replace('/[^0-9+]/', '', $id['phone']), 0, 15) : null;
 
-    $stmt = $db->prepare("INSERT INTO webuser (email, usertype, auth_provider, {$col}) VALUES (?, 'p', ?, ?)");
-    $stmt->bind_param('sss', $id['email'], $provider, $id['sub']);
-    if (!$stmt->execute()) {
-        edoc_log('webuser insert failed: ' . $db->error);
+    // webuser.email is the primary key, so inserting it first also blocks a duplicate signup race.
+    // Both rows are written in one transaction: either the whole account exists or nothing does.
+    $created = false;
+    $db->begin_transaction();
+    try {
+        $stmt = $db->prepare("INSERT INTO webuser (email, usertype, auth_provider, {$col}) VALUES (?, 'p', ?, ?)");
+        $stmt->bind_param('sss', $id['email'], $provider, $id['sub']);
+        $ok = $stmt->execute();
+
+        if ($ok) {
+            $stmt = $db->prepare("INSERT INTO patient (pemail, pname, ppassword, ptel) VALUES (?, ?, NULL, ?)");
+            $stmt->bind_param('sss', $id['email'], $name, $phone);
+            $ok = $stmt->execute();
+        }
+        if ($ok) {
+            $db->commit();
+            $created = true;
+        } else {
+            edoc_log('federated signup failed: ' . $db->error);
+            $db->rollback();
+        }
+    } catch (Throwable $ex) {
+        edoc_log('federated signup exception: ' . $ex->getMessage());
+        $db->rollback();
+    }
+    if (!$created) {
         oauth_fail('We were unable to create your account at this time. Please try again later or contact the clinic.');
     }
-    $stmt = $db->prepare("INSERT INTO patient (pemail, pname, ppassword, ptel) VALUES (?, ?, NULL, ?)");
-    $stmt->bind_param('sss', $id['email'], $name, $phone);
-    $stmt->execute();
 
     complete_login($db, $id['email'], 'p', $provider, $id);
 }
