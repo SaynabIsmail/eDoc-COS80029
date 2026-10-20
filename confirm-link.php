@@ -39,6 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     if (!csrf_check()) {
         $error = 'Your session has expired. Please try again.';
+    } elseif (($pending['attempts'] ?? 0) >= 5) {
+        // same limit as the 2FA page: too many wrong passwords ends this link attempt
+        unset($_SESSION['pending_link']);
+        oauth_fail('Too many incorrect passwords were entered, so this link attempt has been cancelled. Please start again from the sign-in page.');
     } else {
         $password = (string)($_POST['password'] ?? '');
         // passwords are still stored as plain text in the original schema
@@ -60,6 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             unset($_SESSION['pending_link']);
             complete_login($database, $pending['email'], $pending['usertype'], $pending['provider'], $pending['identity']);
         }
+        $_SESSION['pending_link']['attempts'] = ($pending['attempts'] ?? 0) + 1;
         $error = 'The password you entered is incorrect. Please try again, or contact the clinic if you no longer have access to your account.';
     }
 }

@@ -45,16 +45,23 @@
         
         $error='<label for="promter" class="form-label"></label>';
 
-        $result= $database->query("select * from webuser where email='$email'");
+        $stmt = $database->prepare("select usertype from webuser where email = ?");
+        $stmt->bind_param('s', $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
         if($result->num_rows==1){
             $utype=$result->fetch_assoc()['usertype'];
             if ($utype=='p'){
                 //TODO
-                $checker = $database->query("select * from patient where pemail='$email' and ppassword='$password'");
+                $stmt = $database->prepare("select 1 from patient where pemail = ? and ppassword = ? and ppassword <> ''");
+                $stmt->bind_param('ss', $email, $password);
+                $stmt->execute();
+                $checker = $stmt->get_result();
                 if ($checker->num_rows==1){
 
 
                     //   Patient dashbord
+                    session_regenerate_id(true);
                     $_SESSION['user']=$email;
                     $_SESSION['usertype']='p';
                     
@@ -66,11 +73,15 @@
 
             }elseif($utype=='a'){
                 //TODO
-                $checker = $database->query("select * from admin where aemail='$email' and apassword='$password'");
+                $stmt = $database->prepare("select 1 from admin where aemail = ? and apassword = ?");
+                $stmt->bind_param('ss', $email, $password);
+                $stmt->execute();
+                $checker = $stmt->get_result();
                 if ($checker->num_rows==1){
 
 
                     //   Admin dashbord
+                    session_regenerate_id(true);
                     $_SESSION['user']=$email;
                     $_SESSION['usertype']='a';
                     
@@ -83,7 +94,10 @@
 
             }elseif($utype=='d'){
                 //TODO
-                $checker = $database->query("select * from doctor where docemail='$email' and docpassword='$password'");
+                $stmt = $database->prepare("select docid from doctor where docemail = ? and docpassword = ? and docpassword <> ''");
+                $stmt->bind_param('ss', $email, $password);
+                $stmt->execute();
+                $checker = $stmt->get_result();
                 if ($checker->num_rows==1){
                     // doctors go through 2FA first (verify-2fa.php sends them to set it up if they haven't yet)
                     $docrow = $checker->fetch_assoc();
