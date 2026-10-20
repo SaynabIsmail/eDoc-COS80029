@@ -12,6 +12,7 @@ if (!is_file(__DIR__ . '/vendor/autoload.php')) {
     exit('Two-factor authentication is not installed yet. Run "composer install" in the edoc folder (see setup.php).');
 }
 require 'vendor/autoload.php';
+require_once 'lib/bootstrap.php';
 include("connection.php");
 
 use PragmaRX\Google2FA\Google2FA;
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (preg_match('/^\d{6}$/', $code)) {
         $google2fa = new Google2FA();
-        if ($google2fa->verifyKey($tfa['secret'], $code, 1)) {
+        if ($google2fa->verifyKey(decrypt_secret($tfa['secret']) ?? '', $code, 1)) {
             finish_doctor_login($email, false);
         }
     } elseif (preg_match('/^[0-9A-F]{8}$/', $code)) {

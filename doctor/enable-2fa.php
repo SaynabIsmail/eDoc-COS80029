@@ -8,6 +8,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == "" || $_SESSION['usertype'
 }
 
 require '../vendor/autoload.php';
+require_once '../lib/bootstrap.php';
 include("../connection.php");
 
 use PragmaRX\Google2FA\Google2FA;
@@ -33,7 +34,7 @@ if ($_POST && isset($_POST['confirm_code'])) {
     $check->execute();
     $row = $check->get_result()->fetch_assoc();
 
-    if ($row && $google2fa->verifyKey($row['secret'], $_POST['confirm_code'])) {
+    if ($row && $google2fa->verifyKey(decrypt_secret($row['secret']) ?? '', $_POST['confirm_code'])) {
         $update = $database->prepare("UPDATE doctor_2fa SET enabled=1 WHERE docid=?");
         $update->bind_param("i", $docid);
         $update->execute();
@@ -64,12 +65,26 @@ $check->execute();
 $existing = $check->get_result()->fetch_assoc();
 
 if (!$existing) {
+    // the secret is stored encrypted at rest; only the plain value is ever shown to the doctor (QR code / manual entry)
     $secret = $google2fa->generateSecretKey();
+    $encrypted = encrypt_secret($secret);
     $insert = $database->prepare("INSERT INTO doctor_2fa (docid, secret, enabled) VALUES (?, ?, 0)");
-    $insert->bind_param("is", $docid, $secret);
+    $insert->bind_param("is", $docid, $encrypted);
     $insert->execute();
 } else {
-    $secret = $existing['secret'];
+    $secret = decrypt_secret($existing['secret']);
+    if ($secret === null) {
+        // stored before encryption was added, or the encryption key changed: doctor has to re-enrol
+        $stmt = $database->prepare("DELETE FROM doctor_2fa WHERE docid=?");
+        $stmt->bind_param("i", $docid);
+        $stmt->execute();
+        $secret = $google2fa->generateSecretKey();
+        $encrypted = encrypt_secret($secret);
+        $insert = $database->prepare("INSERT INTO doctor_2fa (docid, secret, enabled) VALUES (?, ?, 0)");
+        $insert->bind_param("is", $docid, $encrypted);
+        $insert->execute();
+        $existing = ['enabled' => 0];
+    }
 }
 
 $already_enabled = $existing && $existing['enabled'] == 1;
