@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Google and Microsoft OAuth (authorization code + PKCE, OpenID Connect).
  * Written in plain PHP so we don't need composer packages on MAMP.
@@ -9,6 +10,7 @@
 require_once __DIR__ . '/bootstrap.php';
 
 const GOOGLE_CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
+const GOOGLE_PHONE_SCOPE = 'https://www.googleapis.com/auth/user.phonenumbers.read';
 const MS_SCOPES = 'openid profile email offline_access User.Read Calendars.ReadWrite';
 
 function oauth_provider(string $provider): array
@@ -21,7 +23,7 @@ function oauth_provider(string $provider): array
             'redirect_uri'  => app_url('oauth-callback.php'),
             'authorize_url' => 'https://accounts.google.com/o/oauth2/v2/auth',
             'token_url'     => 'https://oauth2.googleapis.com/token',
-            'scope'         => 'openid email profile ' . GOOGLE_CALENDAR_SCOPE,
+            'scope'         => 'openid email profile ' . GOOGLE_CALENDAR_SCOPE . ' ' . GOOGLE_PHONE_SCOPE,
             'issuers'       => ['https://accounts.google.com', 'accounts.google.com'],
         ];
     }
@@ -71,7 +73,7 @@ function oauth_begin(string $provider, string $mode = 'login', bool $forceConsen
             e($name) . ($mode === 'connect' ? ' calendar connection' : ' sign-in')
                 . ' is not available at the moment because it has not yet been enabled for this site.<br><br>'
                 . ($signedIn ? 'Your account and appointments are not affected.'
-                             : 'Please sign in with your email address and password instead.'),
+                    : 'Please sign in with your email address and password instead.'),
             $back,
             $signedIn ? 'Return to eDoc' : 'Return to sign in',
             503
@@ -85,8 +87,11 @@ function oauth_begin(string $provider, string $mode = 'login', bool $forceConsen
     $challenge = b64url(hash('sha256', $verifier, true));
 
     $_SESSION['oauth'][$provider] = [
-        'state' => $state, 'nonce' => $nonce, 'verifier' => $verifier,
-        'mode' => $mode, 'started' => time(),
+        'state' => $state,
+        'nonce' => $nonce,
+        'verifier' => $verifier,
+        'mode' => $mode,
+        'started' => time(),
     ];
 
     $params = [
@@ -156,8 +161,10 @@ function oauth_complete(string $provider): array
         ? in_array($claims['iss'] ?? '', $p['issuers'], true)
         : (bool)preg_match('#^https://login\.microsoftonline\.com/[0-9a-f-]{36}/v2\.0$#', $claims['iss'] ?? '');
     $aud = (array)($claims['aud'] ?? []);
-    if (!$issOk || !in_array($p['client_id'], $aud, true) || ($claims['exp'] ?? 0) < time() - 60
-        || !hash_equals($saved['nonce'], (string)($claims['nonce'] ?? ''))) {
+    if (
+        !$issOk || !in_array($p['client_id'], $aud, true) || ($claims['exp'] ?? 0) < time() - 60
+        || !hash_equals($saved['nonce'], (string)($claims['nonce'] ?? ''))
+    ) {
         edoc_log("$provider ID token rejected: " . json_encode(['iss' => $claims['iss'] ?? null, 'aud' => $aud]));
         throw new RuntimeException('The sign-in response could not be verified. Please try again.');
     }
@@ -176,7 +183,7 @@ function oauth_complete(string $provider): array
             'email'          => strtolower(trim($claims['email'] ?? '')),
             'email_verified' => !empty($claims['email_verified']) && $claims['email_verified'] !== 'false',
             'name'           => trim($claims['name'] ?? ''),
-            'phone'          => null, // google's profile scope doesn't include a phone number
+            'phone'          => google_fetch_phone($tok['access_token']),
             'tokens'         => $tokens,
             'mode'           => $saved['mode'],
         ];
@@ -237,4 +244,25 @@ function oauth_refresh(string $provider, string $refreshToken): ?array
         'refresh_token' => $res['json']['refresh_token'] ?? $refreshToken,
         'expires_at'    => time() + (int)($res['json']['expires_in'] ?? 3600) - 60,
     ];
+}
+
+/** Phone number from the Google profile (People API). Null if none or not shared. */
+function google_fetch_phone(string $accessToken): ?string
+{
+    $res = http_request(
+        'GET',
+        'https://people.googleapis.com/v1/people/me?personFields=phoneNumbers',
+        ['bearer' => $accessToken]
+    );
+    if ($res['status'] !== 200) {
+        edoc_log("Google People API phone lookup failed: HTTP {$res['status']} " . substr($res['body'], 0, 200));
+        return null;
+    }
+    $numbers = $res['json']['phoneNumbers'] ?? [];
+    foreach ($numbers as $n) {
+        if (!empty($n['metadata']['primary'])) {
+            return $n['canonicalForm'] ?? $n['value'] ?? null;
+        }
+    }
+    return $numbers[0]['canonicalForm'] ?? $numbers[0]['value'] ?? null;
 }
