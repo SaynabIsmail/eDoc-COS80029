@@ -1,0 +1,6 @@
+{
+    "require": {
+        "pragmarx/google2fa": "^9.1",
+        "endroid/qr-code": "^4.8"
+    }
+}

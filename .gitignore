@@ -1,0 +1,6 @@
+/vendor/
+config.php
+config.microsoft.php
+logs/
+*.log
+.DS_Store
